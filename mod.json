@@ -1,0 +1,10 @@
+{
+  "name": "plugin-parser",
+  "version": "0.0.0",
+  "description": "Replace the internal plugin parser",
+  "dependencies": {
+    "essentials": ">=0.0.0"
+  },
+  "author": "orzFly",
+  "homepage": "https://github.com/mvUCCU/mod-plugin-parser"
+}
