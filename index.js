@@ -9,3 +9,13 @@ var readLocalFile = function(name) {
 }
 
 Essentials.addSingleton("PluginParser", readLocalFile("Singletons/PluginParser.qml"))
+
+;[
+  "Main/Dialog_PluginSettings.qml.js",
+].forEach(function(i) {
+  if (path.extname(i) == ".js" && path.extname(path.basename(i, ".js")) == ".qml") {
+    require("./" + i)
+  } else {
+    ModAPI.add(i, readLocalFile(i))
+  }
+})
