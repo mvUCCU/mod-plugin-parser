@@ -2,6 +2,7 @@ var ModAPI = require('modapi')
 var _ = require('lodash')
 
 var qml = ModAPI.QMLFile("Main/Dialog_PluginSettings.qml")
+qml.addImportPath("../Singletons/plugin-parser")
 var node = qml.getObjectById("main").node
 
 node.function("processCommentBlock", null)

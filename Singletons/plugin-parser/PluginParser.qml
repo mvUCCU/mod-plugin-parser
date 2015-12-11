@@ -1,9 +1,12 @@
 pragma Singleton
 import QtQuick 2.3
 import Tkool.rpg 1.0
+import UCCU 1.0 as UCCU
+import ".."
 
-QtObject {
-    property var handlers: null
+Item {
+    property var _pluginsCache: null
+    property var _handlers: null
 
     function parse(code, locale) {
         return _processCommentBlock(_filterComments(code, locale)).data;
@@ -11,7 +14,7 @@ QtObject {
 
     function registerHandler(keyword, handler) {
         _initBuiltInHandlers();
-        handlers[keyword] = handler;
+        _handlers[keyword] = handler;
     }
 
     function _filterComments(code, locale) {
@@ -53,41 +56,41 @@ QtObject {
             text = text.trim();
             var text2 = text.split("\n")[0];
 
-            var handler = handlers[keyword];
+            var handler = _handlers[keyword];
             if (handler) handler(context, text, text2);
         }
         return context;
     }
 
     function _initBuiltInHandlers() {
-        if (handlers) return;
+        if (_handlers) return;
 
-        handlers = {};
+        _handlers = {};
 
-        handlers['help'] = function(context, text, text2) {
+        _handlers['help'] = function(context, text, text2) {
             context.data.help = text;
         };
 
-        handlers['plugindesc'] = function(context, text, text2) {
+        _handlers['plugindesc'] = function(context, text, text2) {
             context.data.description = text;
         };
 
-        handlers['author'] = function(context, text, text2) {
+        _handlers['author'] = function(context, text, text2) {
             context.data.author = text2;
         };
 
-        handlers['param'] = function(context, text, text2) {
+        _handlers['param'] = function(context, text, text2) {
             context.currentParameter = {name: text2};
 
             if (!context.data.parameters) context.data.parameters = [];
             context.data.parameters.push(context.currentParameter);
         };
 
-        handlers['desc'] = function(context, text, text2) {
+        _handlers['desc'] = function(context, text, text2) {
             context.currentParameter.description = text;
         };
 
-        handlers['default'] = function(context, text, text2) {
+        _handlers['default'] = function(context, text, text2) {
             context.currentParameter.defaultValue = text2;
         };
     }
