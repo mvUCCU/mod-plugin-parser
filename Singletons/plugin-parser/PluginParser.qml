@@ -33,6 +33,7 @@ Item {
         var cache = _pluginsCache[name];
         var path = getPluginPath(name);
         var stats = UCCU.FileSystemAPI.statSync(TkoolAPI.urlToPath(path)) || {};
+        if (!stats) return {};
         if (cache && cache.mtime !== undefined && cache.mtime === stats.mtime.getTime() && cache.size !== undefined && cache.size === stats.size) {
             return cache.data;
         }
@@ -46,7 +47,8 @@ Item {
     }
 
     function parse(code, locale) {
-        return _processCommentBlock(_filterComments(code, locale)).data;
+        var result = _processCommentBlock(_filterComments(code, locale)).data;
+        return result;
     }
 
     function _filterComments(code, locale) {
@@ -76,6 +78,7 @@ Item {
         _initBuiltInHandlers();
 
         var context = {"data": {}};
+        context.currentParent = context.data;
         var re = /@(\w+)([^@]*)/g;
         while (true) {
             var match = re.exec(comments);
@@ -118,17 +121,45 @@ Item {
 
         _handlers['param'] = function(context, text, text2) {
             context.currentParameter = {name: text2};
+            context.currentObject = context.currentParameter;
 
-            if (!context.data.parameters) context.data.parameters = [];
-            context.data.parameters.push(context.currentParameter);
+            if (!context.currentParent.parameters) context.currentParent.parameters = [];
+            context.currentParent.parameters.push(context.currentObject);
         };
 
         _handlers['desc'] = function(context, text, text2) {
-            context.currentParameter.description = text;
+            context.currentObject.description = text;
         };
 
         _handlers['default'] = function(context, text, text2) {
-            context.currentParameter.defaultValue = text2;
+            context.currentObject.defaultValue = text2;
         };
+
+        _handlers['title'] = function(context, text, text2) {
+            context.currentObject.title = text2;
+        };
+
+        _handlers['type'] = function(context, text, text2) {
+            context.currentObject.type = text2;
+        };
+
+        _handlers['eventgroup'] = function(context, text, text2) {
+            context.currentEventGroup = {name: text2};
+            context.currentObject = context.currentEventGroup;
+            context.currentParent = context.currentEventGroup;
+
+            if (!context.data.eventGroups) context.data.eventGroups = [];
+            context.data.eventGroups.push(context.currentObject);
+        };
+
+        _handlers['event'] = function(context, text, text2) {
+            context.currentEventCommand = {name: text2};
+            context.currentObject = context.currentEventCommand;
+            context.currentParent = context.currentEventCommand;
+
+            if (!context.currentEventGroup.eventCommands) context.currentEventGroup.eventCommands = [];
+            context.currentEventGroup.eventCommands.push(context.currentObject);
+        };
+
     }
 }
