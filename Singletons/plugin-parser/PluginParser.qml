@@ -5,16 +5,48 @@ import UCCU 1.0 as UCCU
 import ".."
 
 Item {
-    property var _pluginsCache: null
+    property var _pluginsCache: ({})
     property var _handlers: null
+
+    function getPluginRoot() {
+        return DataManager.projectUrl + "js/plugins" + "/";
+    }
+
+    function getPluginPath(name, ext) {
+        if (ext === undefined || ext === null) ext = ".js";
+
+        return getPluginRoot() + name + ext;
+    }
+
+    Connections {
+        target: DataManager
+        onProjectUrlChanged: {
+            _cleanCache();
+        }
+    }
+
+    function _cleanCache() {
+        _pluginsCache = {};
+    }
+
+    function parsePlugin(name) {
+        var cache = _pluginsCache[name];
+        var path = getPluginPath(name);
+        var stats = UCCU.FileSystemAPI.statSync(TkoolAPI.urlToPath(path)) || {};
+        if (cache && cache.mtime !== undefined && cache.mtime === stats.mtime.getTime() && cache.size !== undefined && cache.size === stats.size) {
+            return cache.data;
+        }
+        cache = {
+            mtime: stats.mtime.getTime(),
+            size: stats.size,
+            data: parse(TkoolAPI.readFile(path))
+        };
+        _pluginsCache[name] = cache;
+        return cache.data;
+    }
 
     function parse(code, locale) {
         return _processCommentBlock(_filterComments(code, locale)).data;
-    }
-
-    function registerHandler(keyword, handler) {
-        _initBuiltInHandlers();
-        _handlers[keyword] = handler;
     }
 
     function _filterComments(code, locale) {
@@ -60,6 +92,11 @@ Item {
             if (handler) handler(context, text, text2);
         }
         return context;
+    }
+
+    function registerHandler(keyword, handler) {
+        _initBuiltInHandlers();
+        _handlers[keyword] = handler;
     }
 
     function _initBuiltInHandlers() {

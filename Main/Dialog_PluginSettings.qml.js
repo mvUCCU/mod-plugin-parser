@@ -3,15 +3,14 @@ var _ = require('lodash')
 
 var qml = ModAPI.QMLFile("Main/Dialog_PluginSettings.qml")
 qml.addImportPath("../Singletons/plugin-parser")
-var node = qml.getObjectById("main").node
+qml.getObjectById("folderListModel").node.object("folder", "PluginParser.getPluginRoot()")
 
+var node = qml.getObjectById("main").node
 node.function("processCommentBlock", null)
 node.function("loadScript", [
   'function loadScript() {',
   '    var name = pluginSelector.currentText;',
-  '    var url = folderListModel.folder + "/" + name + ".js";',
-  '    var script = TkoolAPI.readFile(url);',
-  '    var data = PluginParser.parse(script);',
+  '    var data = PluginParser.parsePlugin(name);',
   '',
   '    pluginHelp = data.help || "";',
   '    pluginDesc = data.description || "";',
