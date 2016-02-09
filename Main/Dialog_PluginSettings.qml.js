@@ -2,12 +2,12 @@ var ModAPI = require('modapi')
 var _ = require('lodash')
 
 var qml = ModAPI.QMLFile("Main/Dialog_PluginSettings.qml")
-qml.addImportPath("../Singletons/plugin-parser")
-qml.getObjectById("folderListModel").node.object("folder", "PluginParser.getPluginRoot()")
+qml.imports.push("import \"../Singletons/plugin-parser\"")
+qml.root.getObjectById("folderListModel").set("folder", "PluginParser.getPluginRoot()")
 
-var node = qml.getObjectById("main").node
-node.function("processCommentBlock", null)
-node.function("loadScript", [
+var node = qml.root.getObjectById("main")
+node.remove("processCommentBlock")
+node.def("loadScript", "Function" [
   'function loadScript() {',
   '    var name = pluginSelector.currentText;',
   '    var data = PluginParser.parsePlugin(name);',
