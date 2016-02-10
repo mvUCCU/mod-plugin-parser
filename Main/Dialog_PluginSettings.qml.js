@@ -7,7 +7,7 @@ qml.root.getObjectById("folderListModel").set("folder", "PluginParser.getPluginR
 
 var node = qml.root.getObjectById("main")
 node.remove("processCommentBlock")
-node.def("loadScript", "Function" [
+node.def("loadScript", "Function", [
   'function loadScript() {',
   '    var name = pluginSelector.currentText;',
   '    var data = PluginParser.parsePlugin(name);',
